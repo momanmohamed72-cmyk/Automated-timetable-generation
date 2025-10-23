@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="htmlElement">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timetable Output Examples</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f172a;
+            padding: 20px;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(147, 51, 234, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+                        0 0 0 1px rgba(148, 163, 184, 0.05);
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .header h1 {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.8em;
+            margin-bottom: 12px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            position: relative;
+        }
+        
+        .header p {
+            color: #94a3b8;
+            font-size: 1.15em;
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            background: rgba(30, 41, 59, 0.6);
+            padding: 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        .tab-btn {
+            background: rgba(51, 65, 85, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: #cbd5e1;
+            padding: 14px 26px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .tab-btn:hover::before {
+            left: 100%;
+        }
+        
+        .tab-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+            border-color: rgba(59, 130, 246, 0.4);
+            background: rgba(51, 65, 85, 0.8);
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+        }
+        
+        .tab-content {
+            display: none;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+        
+        /* Console Output Style */
+        .console-output {
+            background: #0a0f1e;
+            color: #10b981;
+            padding: 25px;
+            border-radius: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.1) inset;
+        }
+        
+        .console-output .success { color: #34d399; text-shadow: 0 0 10px rgba(52, 211, 153, 0.5); }
+        .console-output .info { color: #60a5fa; text-shadow: 0 0 10px rgba(96, 165, 250, 0.5); }
+        .console-output .warning { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
+        .console-output .error { color: #f87171; text-shadow: 0 0 10px rgba(248, 113, 113, 0.5); }
+        .console-output .header-line { color: #a78bfa; font-weight: bold; text-shadow: 0 0 10px rgba(167, 139, 250, 0.5); }
+        
+        /* Table Style */
+        .timetable-grid {
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            padding: 18px;
+            text-align: right;
+            font-size: 15px;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        td {
+            padding: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            text-align: right;
+            background: rgba(30, 41, 59, 0.4);
+            color: #e2e8f0;
+        }
+        
+        tr:hover td {
+            background: rgba(59, 130, 246, 0.1);
+            transform: scale(1.01);
+            transition: all 0.3s;
+        }
+        
+        .course-card {
+            background: rgba(59, 130, 246, 0.1);
+            padding: 12px;
+            border-radius: 12px;
+            border-right: 4px solid #3b82f6;
+            margin-bottom: 5px;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .course-card:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateX(-4px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .course-name {
+            font-weight: bold;
+            color: #60a5fa;
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+        
+        .course-details {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        
+        .course-details span {
+            display: inline-block;
+            margin-left: 15px;
+            transition: color 0.3s;
+        }
+        
+        .course-card:hover .course-details span {
+            color: #cbd5e1;
+        }
+        
+        .icon {
+            margin-left: 5px;
+        }
+        
+        /* Weekly View */
+        .weekly-grid {
+            display: grid;
+            grid-template-columns: 100px repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .day-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            padding: 18px;
+            text-align: center;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .time-slot {
+            background: rgba(51, 65, 85, 0.6);
+            padding: 12px;
+            text-align: center;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #cbd5e1;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        .class-cell {
+            background: rgba(30, 41, 59, 0.6);
+            border: 2px solid rgba(148, 163, 184, 0.2);
+            border-radius: 14px;
+            padding: 14px;
+            min-height: 80px;
+            transition: all 0.3s;
+        }
+        
+        .class-cell:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+        }
+        
+        .class-cell.lecture {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: #3b82f6;
+        }
+        
+        .class-cell.lab {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: #10b981;
+        }
+        
+        .class-cell.empty {
+            background: rgba(30, 41, 59, 0.3);
+            border-style: dashed;
+            border-color: rgba(148, 163, 184, 0.1);
+        }
+        
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 48px rgba(59, 130, 246, 0.4);
+        }
+        
+        .stat-number {
+            font-size: 3.5em;
+            font-weight: 800;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.95;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+        
+        /* Download Button */
+        .download-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .download-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.5);
+        }
+        
+        .download-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        /* Language Toggle Styles */
+        .language-toggle {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 30px;
+            padding: 6px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+        
+        .lang-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 14px;
+            color: #94a3b8;
+        }
+        
+        .lang-btn:hover {
+            color: #cbd5e1;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .lang-btn.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        
+        /* RTL/LTR Support */
+        [dir="rtl"] {
+            text-align: right;
+        }
+        
+        [dir="rtl"] .course-details span {
+            margin-left: 15px;
+            margin-right: 0;
+        }
+        
+        [dir="rtl"] .icon {
+            margin-left: 5px;
+            margin-right: 0;
+        }
+        
+        [dir="ltr"] {
+            text-align: left;
+        }
+        
+        [dir="ltr"] .course-details span {
+            margin-right: 15px;
+            margin-left: 0;
+        }
+        
+        [dir="ltr"] .icon {
+            margin-right: 5px;
+            margin-left: 0;
+        }
+        
+        [dir="ltr"] th,
+        [dir="ltr"] td {
+            text-align: left;
+        }
+        
+        /* Course List Styles */
+        .course-list-item:hover {
+            background: rgba(16, 185, 129, 0.1) !important;
+            border-color: #10b981 !important;
+            transform: translateX(-4px);
+        }
+        
+        h2, h3 {
+            color: #e2e8f0 !important;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        input[type="text"], 
+        input[type="file"],
+        select {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: #e2e8f0;
+            transition: all 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        input[type="text"]::placeholder {
+            color: #64748b;
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 10px;
+            border: 2px solid rgba(30, 41, 59, 0.5);
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Toggle -->
+    <div class="language-toggle">
+        <button class="lang-btn active" onclick="switchLanguage('ar')">العربية</button>
+        <button class="lang-btn" onclick="switchLanguage('en')">English</button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1 data-ar="🎓 نماذج الـ Output للجدول" data-en="🎓 Timetable Output Examples">🎓 نماذج الـ Output للجدول</h1>
+            <p data-ar="شاهد شكل النتائج النهائية بعد تشغيل النظام" data-en="View the final results after running the system">شاهد شكل النتائج النهائية بعد تشغيل النظام</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('console')" data-ar="🖥️ Console Output" data-en="🖥️ Console Output">🖥️ Console Output</button>
+            <button class="tab-btn" onclick="showTab('table')" data-ar="📊 Excel Output" data-en="📊 Excel Output">📊 Excel Output</button>
+            <button class="tab-btn" onclick="showTab('weekly')" data-ar="📅 Weekly View" data-en="📅 Weekly View">📅 Weekly View</button>
+            <button class="tab-btn" onclick="showTab('stats')" data-ar="📈 Statistics" data-en="📈 Statistics">📈 Statistics</button>
+            <button class="tab-btn" onclick="showTab('selection')" data-ar="🎯 Course Selection" data-en="🎯 Course Selection">🎯 Course Selection</button>
+            <button class="tab-btn" onclick="showTab('upload')" data-ar="📁 Upload Data" data-en="📁 Upload Data">📁 Upload Data</button>
+        </div>
+        
+        <!-- Console Output Tab -->
+        <div id="console" class="tab-content active">
+            <h2 style="margin-bottom: 20px; color: #e2e8f0; font-weight: 700; font-size: 1.8em;" data-ar="🖥️ شكل الـ Output في الـ Terminal" data-en="🖥️ Terminal Output Format">🖥️ شكل الـ Output في الـ Terminal</h2>
+            <div class="console-output">
+<span class="header-line">================================================================================</span>
+<span class="header-line">🎓 CSIT DEPARTMENT - AUTOMATED TIMETABLE GENERATOR</span>
+<span class="header-line">================================================================================</span>
+
+<span class="info">📂 Loading data from CSV files...</span>
+<span class="success">✅ Loaded 91 courses</span>
+<span class="success">✅ Loaded 56 instructors</span>
+<span class="success">✅ Loaded 56 rooms</span>
+<span class="success">✅ Loaded 20 timeslots</span>
+<span class="success">✅ Loaded 12 sections</span>
+
+<span class="success">✨ All data loaded successfully!</span>
+
+<span class="info">🔍 Generating CSP variables...</span>
+<span class="info">📊 Total variables to assign: 328</span>
+
+<span class="info">🧩 Starting CSP solver (Backtracking)...</span>
+<span class="info">⏳ This may take a moment...</span>
+
+Attempt 1/5...
+<span class="success">✅ Solution found on attempt 1!</span>
+
+<span class="header-line">================================================================================</span>
+<span class="header-line">📅 GENERATED TIMETABLE</span>
+<span class="header-line">================================================================================</span>
+
+<span class="header-line">================================================================================</span>
+<span class="header-line">Section: L1-S1</span>
+<span class="header-line">================================================================================</span>
+
+<span class="info">📚 Fundamentals of Programming (CSC111)</span>
+   <span class="success">⏰ Sunday 09:00 - 10:30</span>
+   <span class="success">🏛️  Room: R101</span>
+   <span class="success">👨‍🏫 Instructor: Dr. Reda Elbasiony</span>
+
+<span class="info">📚 Data Structures and Algorithms (CSC121)</span>
+   <span class="success">⏰ Sunday 10:45 - 12:15</span>
+   <span class="success">🏛️  Room: R102</span>
+   <span class="success">👨‍🏫 Instructor: Dr. Moustafa Mahmoud</span>
+
+<span class="info">📚 Machine Learning (AID321)</span>
+   <span class="success">⏰ Monday 09:00 - 10:30</span>
+   <span class="success">🏛️  Room: L1</span>
+   <span class="success">👨‍🏫 Instructor: Prof. Marghany Hassan</span>
+
+<span class="info">📚 Mathematics (1) (MTH111)</span>
+   <span class="success">⏰ Monday 10:45 - 12:15</span>
+   <span class="success">🏛️  Room: R103</span>
+   <span class="success">👨‍🏫 Instructor: Dr. Ayman Arafa</span>
+
+<span class="info">📚 Digital Logic Design (ECE111)</span>
+   <span class="success">⏰ Tuesday 09:00 - 10:30</span>
+   <span class="success">🏛️  Room: L2</span>
+   <span class="success">👨‍🏫 Instructor: Prof. Ahmed Allam</span>
+
+<span class="header-line">================================================================================</span>
+
+<span class="success">✅ Timetable exported to: generated_timetable.xlsx</span>
+
+<span class="header-line">================================================================================</span>
+<span class="success">✨ DONE! Check 'generated_timetable.xlsx' for results</span>
+<span class="header-line">================================================================================</span>
+            </div>
+        </div>
+        
+        <!-- Excel Output Tab -->
+        <div id="table" class="tab-content">
+            <h2 style="margin-bottom: 20px; color: #e2e8f0; font-weight: 700; font-size: 1.8em;" data-ar="📊 شكل الجدول في ملف Excel" data-en="📊 Excel Table Format">📊 شكل الجدول في ملف Excel</h2>
+            <div class="timetable-grid">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-ar="الشعبة" data-en="Section">الشعبة</th>
+                            <th data-ar="المادة" data-en="Course">المادة</th>
+                            <th data-ar="كود المادة" data-en="Code">كود المادة</th>
+                            <th data-ar="النوع" data-en="Type">النوع</th>
+                            <th data-ar="اليوم" data-en="Day">اليوم</th>
+                            <th data-ar="الوقت من" data-en="Start Time">الوقت من</th>
+                            <th data-ar="الوقت إلى" data-en="End Time">الوقت إلى</th>
+                            <th data-ar="القاعة" data-en="Room">القاعة</th>
+                            <th data-ar="المدرس" data-en="Instructor">المدرس</th>
+                        </tr>
+                    </thead>
+                    <tbody id="timetableBody">
+                        <!-- Real data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <button class="download-btn" onclick="downloadExcel()" data-ar="📥 تحميل Excel File" data-en="📥 Download Excel File">
+                📥 تحميل Excel File
+            </button>
+        </div>
+        
+        <!-- Weekly View Tab -->
+        <div id="weekly" class="tab-content">
+            <h2 style="margin-bottom: 20px; color: #e2e8f0; font-weight: 700; font-size: 1.8em;" data-ar="📅 عرض الجدول الأسبوعي - شعبة AID-S1" data-en="📅 Weekly Schedule - Section AID-S1">📅 عرض الجدول الأسبوعي - شعبة AID-S1</h2>
+            <div class="weekly-grid">
+                <div></div>
+                <div class="day-header" data-ar="الأحد" data-en="Sunday">الأحد</div>
+                <div class="day-header" data-ar="الإثنين" data-en="Monday">الإثنين</div>
+                <div class="day-header" data-ar="الثلاثاء" data-en="Tuesday">الثلاثاء</div>
+                <div class="day-header" data-ar="الأربعاء" data-en="Wednesday">الأربعاء</div>
+                <div class="day-header" data-ar="الخميس" data-en="Thursday">الخميس</div>
+                
+                <!-- 9:00 - 10:30 -->
+                <div class="time-slot">09:00<br>10:30</div>
+                <div class="class-cell lecture">
+                    <div class="course-card">
+                        <div class="course-name">📚 Fundamentals of Programming</div>
+                        <div class="course-details">
+                            <span>🏛️ R101</span>
+                            <span>👨‍🏫 Dr. Reda</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="class-cell lab">
+                    <div class="course-card">
+                        <div class="course-name">💻 Machine Learning Lab</div>
+                        <div class="course-details">
+                            <span>🏛️ L1</span>
+                            <span>👨‍🏫 Prof. Marghany</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="class-cell lecture">
+                    <div class="course-card">
+                        <div class="course-name">📚 Digital Logic Design</div>
+                        <div class="course-details">
+                            <span>🏛️ L2</span>
+                            <span>👨‍🏫 Prof. Ahmed</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="class-cell empty"></div>
+                <div class="class-cell empty"></div>
+                
+                <!-- 10:45 - 12:15 -->
+                <div class="time-slot">10:45<br>12:15</div>
+                <div class="class-cell lecture">
+                    <div class="course-card">
+                        <div class="course-name">📚 Data Structures</div>
+                        <div class="course-details">
+                            <span>🏛️ R102</span>
+                            <span>👨‍🏫 Dr. Moustafa</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="class-cell lecture">
+                    <div class="course-card">
+                        <div class="course-name">📐 Mathematics (1)</div>
+                        <div class="course-details">
+                            <span>🏛️ R103</span>
+                            <span>👨‍🏫 Dr. Ayman</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="class-cell empty"></div>
+                <div class="class-cell lecture">
+                    <div class="course-card">
+                        <div class="course-name">📚 Physics 1</div>
+                        <div class="course-details">
+                            <span>🏛️ R104</span>
+                            <span>👨‍🏫 Dr. Adel</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="class-cell empty"></div>
+                
+                <!-- 12:30 - 14:00 -->
+                <div class="time-slot">12:30<br>14:00</div>
+                <div class="class-cell empty"></div>
+                <div class="class-cell empty"></div>
+                <div class="class-cell lecture">
+                    <div class="course-card">
+                        <div class="course-name">✍️ English Language</div>
+                        <div class="course-details">
+                            <span>🏛️ R105</span>
+                            <span>👨‍🏫 Dr. LRA407</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="class-cell empty"></div>
+                <div class="class-cell lab">
+                    <div class="course-card">
+                        <div class="course-name">💻 Physics Lab</div>
+                        <div class="course-details">
+                            <span>🏛️ L3</span>
+                            <span>👨‍🏫 Dr. Adel</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Statistics Tab -->
+        <div id="stats" class="tab-content">
+            <h2 style="margin-bottom: 20px; color: #e2e8f0; font-weight: 700; font-size: 1.8em;" data-ar="📈 إحصائيات الجدول المُنتج" data-en="📈 Generated Timetable Statistics">📈 إحصائيات الجدول المُنتج</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalLectures">320</div>
+                    <div class="stat-label" data-ar="إجمالي المحاضرات المجدولة" data-en="Total Scheduled Lectures">إجمالي المحاضرات المجدولة</div>
+                </div>
+                
+                <div class="stat-card" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(239, 68, 68, 0.2) 100%);">
+                    <div class="stat-number" id="totalSections">12</div>
+                    <div class="stat-label" data-ar="عدد الشعب" data-en="Number of Sections">عدد الشعب</div>
+                </div>
+                
+                <div class="stat-card" style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);">
+                    <div class="stat-number" id="totalCourses">91</div>
+                    <div class="stat-label" data-ar="عدد المواد" data-en="Number of Courses">عدد المواد</div>
+                </div>
+                
+                <div class="stat-card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label" data-ar="نسبة نجاح الـ Hard Constraints" data-en="Hard Constraints Success Rate">نسبة نجاح الـ Hard Constraints</div>
+                </div>
+                
+                <div class="stat-card" style="background: linear-gradient(135deg, rgba(251, 146, 60, 0.2) 0%, rgba(245, 158, 11, 0.2) 100%);">
+                    <div class="stat-number">92%</div>
+                    <div class="stat-label" data-ar="نسبة نجاح الـ Soft Constraints" data-en="Soft Constraints Success Rate">نسبة نجاح الـ Soft Constraints</div>
+                </div>
+                
+                <div class="stat-card" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%);">
+                    <div class="stat-number" id="totalInstructors">56</div>
+                    <div class="stat-label" data-ar="عدد المدرسين" data-en="Number of Instructors">عدد المدرسين</div>
+                </div>
+                
+                <div class="stat-card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);">
+                    <div class="stat-number" id="totalRooms">56</div>
+                    <div class="stat-label" data-ar="عدد القاعات" data-en="Number of Rooms">عدد القاعات</div>
+                </div>
+                
+                <div class="stat-card" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(219, 39, 119, 0.2) 100%);">
+                    <div class="stat-number" id="totalTimeSlots">20</div>
+                    <div class="stat-label" data-ar="الفترات الزمنية" data-en="Time Slots">الفترات الزمنية</div>
+                </div>
+            </div>
+            
+            <div style="background: rgba(30, 41, 59, 0.6); padding: 25px; border-radius: 15px; margin-top: 30px; border: 1px solid rgba(148, 163, 184, 0.2);">
+                <h3 style="color: #60a5fa; margin-bottom: 15px; font-size: 1.3em;" data-ar="✅ حالة القيود الإجبارية" data-en="✅ Hard Constraints Status">✅ حالة القيود الإجبارية</h3>
+                <div style="margin-bottom: 10px; color: #e2e8f0;">
+                    <span style="color: #10b981; font-weight: bold;">✓</span> <span data-ar="عدم تداخل المدرسين" data-en="No instructor overlap">No instructor overlap</span>: <strong style="color: #34d399;">100% satisfied</strong>
+                </div>
+                <div style="margin-bottom: 10px; color: #e2e8f0;">
+                    <span style="color: #10b981; font-weight: bold;">✓</span> <span data-ar="عدم تداخل القاعات" data-en="No room overlap">No room overlap</span>: <strong style="color: #34d399;">100% satisfied</strong>
+                </div>
+                <div style="margin-bottom: 10px; color: #e2e8f0;">
+                    <span style="color: #10b981; font-weight: bold;">✓</span> <span data-ar="تطابق نوع القاعة" data-en="Room type match">Room type match</span>: <strong style="color: #34d399;">100% satisfied</strong>
+                </div>
+                <div style="color: #e2e8f0;">
+                    <span style="color: #10b981; font-weight: bold;">✓</span> <span data-ar="تعيين جميع المحاضرات" data-en="All lectures assigned">All lectures assigned</span>: <strong style="color: #34d399;">100% satisfied</strong>
+                </div>
+                
+                <h3 style="color: #60a5fa; margin: 25px 0 15px 0; font-size: 1.3em;" data-ar="📊 حالة القيود الاختيارية" data-en="📊 Soft Constraints Status">📊 حالة القيود الاختيارية</h3>
+                <div style="margin-bottom: 10px; color: #e2e8f0;">
+                    <span style="color: #10b981; font-weight: bold;">✓</span> <span data-ar="تقليل الفجوات" data-en="Minimal gaps">Minimal gaps</span>: <strong style="color: #34d399;">92% satisfied</strong>
+                </div>
+                <div style="margin-bottom: 10px; color: #e2e8f0;">
+                    <span style="color: #fbbf24; font-weight: bold;">⚠</span> <span data-ar="تجنب الصباح الباكر" data-en="Avoid early morning">Avoid early morning</span>: <strong style="color: #fbbf24;">78% satisfied</strong>
+                </div>
+                <div style="margin-bottom: 10px; color: #e2e8f0;">
+                    <span style="color: #10b981; font-weight: bold;">✓</span> <span data-ar="التوزيع المتوازن" data-en="Even distribution">Even distribution</span>: <strong style="color: #34d399;">91% satisfied</strong>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Course Selection Tab -->
+        <div id="selection" class="tab-content">
+            <h2 style="margin-bottom: 20px; color: #e2e8f0; font-weight: 700; font-size: 1.8em;" data-ar="🎯 اختيار المواد وإنشاء الجدول" data-en="🎯 Course Selection & Timetable Generation">🎯 اختيار المواد وإنشاء الجدول</h2>
+            
+            <!-- Course Filtering -->
+            <div style="background: rgba(30, 41, 59, 0.6); padding: 20px; border-radius: 15px; margin-bottom: 30px; border: 1px solid rgba(148, 163, 184, 0.2);">
+                <h3 style="color: #60a5fa; margin-bottom: 15px; font-size: 1.3em;" data-ar="🔍 فلترة المواد" data-en="🔍 Filter Courses">🔍 فلترة المواد</h3>
+                
+                <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <input type="text" id="courseSearch" placeholder="Search courses..." style="flex: 1; min-width: 200px; padding: 12px 16px; border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 12px; background: rgba(15, 23, 42, 0.6); color: #e2e8f0; font-size: 14px; font-weight: 500;" onkeyup="filterCourses()" oninput="filterCourses()">
+                    
+                    <select id="typeFilter" onchange="filterCourses()" style="padding: 12px 16px; border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 12px; background: rgba(15, 23, 42, 0.6); color: #e2e8f0; font-size: 14px; font-weight: 600; cursor: pointer;">
+                        <option value="">All Types</option>
+                        <option value="Lecture">Lecture</option>
+                        <option value="Lab">Lab</option>
+                        <option value="Lecture and Lab">Lecture and Lab</option>
+                    </select>
+                    
+                    <select id="departmentFilter" onchange="filterCourses()" style="padding: 12px 16px; border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 12px; background: rgba(15, 23, 42, 0.6); color: #e2e8f0; font-size: 14px; font-weight: 600; cursor: pointer;">
+                        <option value="">All Departments</option>
+                        <option value="AID">AID (AI & Data Science)</option>
+                        <option value="CSC">CSC (Computer Science)</option>
+                        <option value="CNC">CNC (Networks & Communication)</option>
+                        <option value="ECE">ECE (Electronics)</option>
+                        <option value="LRA">LRA (Liberal Arts)</option>
+                        <option value="MTH">MTH (Mathematics)</option>
+                        <option value="PHY">PHY (Physics)</option>
+                        <option value="CHM">CHM (Chemistry)</option>
+                    </select>
+                    
+                    <button onclick="selectAllVisible()" class="download-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 12px 20px; font-size: 14px;">
+                        Select All Visible
+                    </button>
+                    
+                    <button onclick="clearSelection()" class="download-btn" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 12px 20px; font-size: 14px;">
+                        Clear Selection
+                    </button>
+                    
+                    <button onclick="testSearch()" class="download-btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 12px 20px; font-size: 14px;">
+                        Test Search
+                    </button>
+                </div>
+                
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <span style="color: #94a3b8;" data-ar="إجمالي المواد:" data-en="Total Courses:">إجمالي المواد:</span>
+                    <span id="totalCoursesCount" style="font-weight: bold; color: #60a5fa;">0</span>
+                    
+                    <span style="color: #94a3b8;" data-ar="المختارة:" data-en="Selected:">المختارة:</span>
+                    <span id="selectedCoursesCount" style="font-weight: bold; color: #10b981;">0</span>
+                    
+                    <span style="color: #94a3b8;" data-ar="المعروضة:" data-en="Visible:">المعروضة:</span>
+                    <span id="visibleCoursesCount" style="font-weight: bold; color: #a78bfa;">0</span>
+                </div>
+            </div>
+            
+            <!-- Simple Course List -->
+            <div style="background: rgba(30, 41, 59, 0.6); padding: 20px; border-radius: 15px; margin-bottom: 30px; border: 1px solid rgba(148, 163, 184, 0.2);">
+                <h3 style="color: #60a5fa; margin-bottom: 15px; font-size: 1.3em;" data-ar="📚 قائمة المواد" data-en="📚 Course List">📚 قائمة المواد</h3>
+                
+                <div style="background: rgba(15, 23, 42, 0.6); border-radius: 10px; padding: 20px; max-height: 500px; overflow-y: auto; border: 1px solid rgba(148, 163, 184, 0.1);">
+                    <div id="coursesList" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Courses will be populated here as simple list items -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Generate Timetable -->
+            <div style="background: rgba(30, 41, 59, 0.6); padding: 20px; border-radius: 15px; margin-bottom: 30px; border: 1px solid rgba(148, 163, 184, 0.2);">
+                <h3 style="color: #60a5fa; margin-bottom: 15px; font-size: 1.3em;" data-ar="⚡ إنشاء الجدول" data-en="⚡ Generate Timetable">⚡ إنشاء الجدول</h3>
+                
+                <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                    <button onclick="generateSelectedTimetable()" class="download-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); font-size: 16px; padding: 15px 30px;">
+                        🎯 Generate Timetable for Selected Courses
+                    </button>
+                    
+                    <button onclick="viewSelectedCourses()" class="download-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); font-size: 16px; padding: 15px 30px;">
+                        👀 View Selected Courses
+                    </button>
+                    
+                    <button onclick="exportSelectedData()" class="download-btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); font-size: 16px; padding: 15px 30px;">
+                        📤 Export Selected Data
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Selected Courses Preview -->
+            <div id="selectedPreview" style="background: rgba(30, 41, 59, 0.6); padding: 20px; border-radius: 15px; display: none; border: 1px solid rgba(148, 163, 184, 0.2);">
+                <h3 style="color: #60a5fa; margin-bottom: 15px; font-size: 1.3em;" data-ar="👀 معاينة المواد المختارة" data-en="👀 Selected Courses Preview">👀 معاينة المواد المختارة</h3>
+                <div id="selectedCoursesList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px;">
+                    <!-- Selected courses will be shown here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Upload Data Tab -->
+        <div id="upload" class="tab-content">
+            <h2 style="margin-bottom: 20px; color: #e2e8f0; font-weight: 700; font-size: 1.8em;" data-ar="📁 رفع وتحديث البيانات" data-en="📁 Upload and Update Data">📁 رفع وتحديث البيانات</h2>
+            
+            <div style="background: rgba(30, 41, 59, 0.6); padding: 30px; border-radius: 15px; margin-bottom: 30px; border: 1px solid rgba(148, 163, 184, 0.2);">
+                <h3 style="color: #60a5fa; margin-bottom: 20px; font-size: 1.3em;" data-ar="📤 رفع ملفات CSV" data-en="📤 Upload CSV Files">📤 رفع ملفات CSV</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <!-- Courses Upload -->
+                    <div style="background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 10px; border: 2px dashed #3b82f6; backdrop-filter: blur(10px);">
+                        <h4 style="color: #60a5fa; margin-bottom: 15px; font-weight: 700;">📚 Courses.csv</h4>
+                        <input type="file" id="coursesFile" accept=".csv" style="margin-bottom: 10px; width: 100%;">
+                        <button onclick="uploadCSV('courses')" class="download-btn" style="width: 100%; margin-top: 10px;">
+                            Upload Courses
+                        </button>
+                        <div id="coursesStatus" style="margin-top: 10px; font-size: 14px; color: #94a3b8;"></div>
+                    </div>
+                    
+                    <!-- Instructors Upload -->
+                    <div style="background: rgba(139, 92, 246, 0.1); padding: 20px; border-radius: 10px; border: 2px dashed #8b5cf6; backdrop-filter: blur(10px);">
+                        <h4 style="color: #a78bfa; margin-bottom: 15px; font-weight: 700;">👨‍🏫 Instructor.csv</h4>
+                        <input type="file" id="instructorFile" accept=".csv" style="margin-bottom: 10px; width: 100%;">
+                        <button onclick="uploadCSV('instructor')" class="download-btn" style="width: 100%; margin-top: 10px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+                            Upload Instructors
+                        </button>
+                        <div id="instructorStatus" style="margin-top: 10px; font-size: 14px; color: #94a3b8;"></div>
+                    </div>
+                    
+                    <!-- Rooms Upload -->
+                    <div style="background: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 10px; border: 2px dashed #10b981; backdrop-filter: blur(10px);">
+                        <h4 style="color: #34d399; margin-bottom: 15px; font-weight: 700;">🏛️ Rooms.csv</h4>
+                        <input type="file" id="roomsFile" accept=".csv" style="margin-bottom: 10px; width: 100%;">
+                        <button onclick="uploadCSV('rooms')" class="download-btn" style="width: 100%; margin-top: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            Upload Rooms
+                        </button>
+                        <div id="roomsStatus" style="margin-top: 10px; font-size: 14px; color: #94a3b8;"></div>
+                    </div>
+                    
+                    <!-- TimeSlots Upload -->
+                    <div style="background: rgba(251, 191, 36, 0.1); padding: 20px; border-radius: 10px; border: 2px dashed #fbbf24; backdrop-filter: blur(10px);">
+                        <h4 style="color: #fbbf24; margin-bottom: 15px; font-weight: 700;">⏰ TimeSlots.csv</h4>
+                        <input type="file" id="timeslotsFile" accept=".csv" style="margin-bottom: 10px; width: 100%;">
+                        <button onclick="uploadCSV('timeslots')" class="download-btn" style="width: 100%; margin-top: 10px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);">
+                            Upload TimeSlots
+                        </button>
+                        <div id="timeslotsStatus" style="margin-top: 10px; font-size: 14px; color: #94a3b8;"></div>
+                    </div>
+                </div>
+                
+                <!-- Upload All Button -->
+                <div style="text-align: center; margin-top: 30px;">
+                    <button onclick="uploadAllFiles()" class="download-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); font-size: 18px; padding: 15px 40px;">
+                        📤 Upload All Files & Update Website
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Data Preview -->
+            <div style="background: rgba(30, 41, 59, 0.6); padding: 30px; border-radius: 15px; border: 1px solid rgba(148, 163, 184, 0.2);">
+                <h3 style="color: #60a5fa; margin-bottom: 20px; font-size: 1.3em;" data-ar="👀 معاينة البيانات" data-en="👀 Data Preview">👀 معاينة البيانات</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="background: rgba(59, 130, 246, 0.2); padding: 20px; border-radius: 14px; text-align: center; border: 1px solid rgba(59, 130, 246, 0.3); backdrop-filter: blur(10px);">
+                        <div style="font-size: 28px; color: #60a5fa; font-weight: 800;" id="previewCourses">91</div>
+                        <div style="color: #94a3b8; margin-top: 8px; font-weight: 600;">Courses</div>
+                    </div>
+                    <div style="background: rgba(139, 92, 246, 0.2); padding: 20px; border-radius: 14px; text-align: center; border: 1px solid rgba(139, 92, 246, 0.3); backdrop-filter: blur(10px);">
+                        <div style="font-size: 28px; color: #a78bfa; font-weight: 800;" id="previewInstructors">56</div>
+                        <div style="color: #94a3b8; margin-top: 8px; font-weight: 600;">Instructors</div>
+                    </div>
+                    <div style="background: rgba(16, 185, 129, 0.2); padding: 20px; border-radius: 14px; text-align: center; border: 1px solid rgba(16, 185, 129, 0.3); backdrop-filter: blur(10px);">
+                        <div style="font-size: 28px; color: #34d399; font-weight: 800;" id="previewRooms">56</div>
+                        <div style="color: #94a3b8; margin-top: 8px; font-weight: 600;">Rooms</div>
+                    </div>
+                    <div style="background: rgba(251, 191, 36, 0.2); padding: 20px; border-radius: 14px; text-align: center; border: 1px solid rgba(251, 191, 36, 0.3); backdrop-filter: blur(10px);">
+                        <div style="font-size: 28px; color: #fbbf24; font-weight: 800;" id="previewTimeSlots">20</div>
+                        <div style="color: #94a3b8; margin-top: 8px; font-weight: 600;">Time Slots</div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="refreshAllData()" class="download-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        🔄 Refresh All Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentLanguage = 'ar';
+        
+        // Real Data from CSV files
+        const realCourses = [
+            { id: "LRA401", name: "Japanese Language (1)", credits: 1, type: "Lecture" },
+            { id: "LRA402", name: "Japanese Language (2)", credits: 1, type: "Lecture" },
+            { id: "LRA403", name: "Japanese Language (3)", credits: 1, type: "Lecture" },
+            { id: "LRA404", name: "Japanese Language (4)", credits: 1, type: "Lecture" },
+            { id: "LRA405", name: "Key Skills Seminar (1)", credits: 2, type: "Lecture" },
+            { id: "LRA101", name: "Japanese Culture", credits: 2, type: "Lecture" },
+            { id: "LRA208", name: "Safety and Risk Management", credits: 2, type: "Lecture" },
+            { id: "LRA102", name: "Introduction to Philosophy", credits: 2, type: "Lecture" },
+            { id: "LRA103", name: "Fine Arts Appreciation-Drawing and Paintings", credits: 2, type: "Lecture" },
+            { id: "LRA104", name: "Music and Technology", credits: 2, type: "Lecture" },
+            { id: "LRA105", name: "Theater and Drama", credits: 2, type: "Lecture" },
+            { id: "LRA106", name: "Physical Education", credits: 2, type: "Lecture" },
+            { id: "LRA107", name: "Selected topics in Japanese arts", credits: 2, type: "Lecture" },
+            { id: "LRA108", name: "Art and Architecture of Ancient Egypt", credits: 2, type: "Lecture" },
+            { id: "LRA109", name: "Introduction to Cultural Anthropology", credits: 2, type: "Lecture" },
+            { id: "LRA110", name: "Modern Egyptian History", credits: 2, type: "Lecture" },
+            { id: "LRA202", name: "Peace studies", credits: 2, type: "Lecture" },
+            { id: "LRA203", name: "Entrepreneurship and Innovation", credits: 2, type: "Lecture" },
+            { id: "LRA204", name: "Public Policy", credits: 2, type: "Lecture" },
+            { id: "LRA205", name: "Egyptian Business Regulations", credits: 2, type: "Lecture" },
+            { id: "LRA206", name: "Sociology of work", credits: 2, type: "Lecture" },
+            { id: "LRA207", name: "African and Middle Eastern studies", credits: 2, type: "Lecture" },
+            { id: "LRA201", name: "Introduction to Economics and Sustainable Development", credits: 2, type: "Lecture" },
+            { id: "CSC316", name: "Understanding Computers", credits: 2, type: "Lecture" },
+            { id: "LRA302", name: "Introduction to Life Sciences", credits: 2, type: "Lecture" },
+            { id: "LRA303", name: "Introduction to Environmental Biology", credits: 2, type: "Lecture" },
+            { id: "LRA304", name: "Water and Politics in Africa and Middle East", credits: 2, type: "Lecture" },
+            { id: "LRA305", name: "Astronomy", credits: 2, type: "Lecture" },
+            { id: "LRA306", name: "Natural Resources and Sustainability", credits: 2, type: "Lecture" },
+            { id: "LRA406", name: "Key Skills Seminar (2)", credits: 2, type: "Lecture" },
+            { id: "LRA407", name: "English Language", credits: 2, type: "Lecture" },
+            { id: "LRA408", name: "Arabic Language", credits: 2, type: "Lecture" },
+            { id: "LRA409", name: "Research Methods", credits: 2, type: "Lecture" },
+            { id: "LRA410", name: "Fundamentals of Communication", credits: 2, type: "Lecture" },
+            { id: "LRA411", name: "Transformational Leadership", credits: 2, type: "Lecture" },
+            { id: "MTH111", name: "Mathematics (1) ( Calculus + Linear Algebra)", credits: 3, type: "Lecture and Lab" },
+            { id: "MTH121", name: "Mathematics (2) (Calculus + Linear Algebra)", credits: 3, type: "Lecture and Lab" },
+            { id: "CSE312", name: "Discrete Mathematics", credits: 3, type: "Lecture and Lab" },
+            { id: "MTH212", name: "Probability and Statistics", credits: 3, type: "Lecture and Lab" },
+            { id: "PHY113", name: "Physics 1", credits: 3, type: "Lecture and Lab" },
+            { id: "PHY123", name: "Physics 2", credits: 3, type: "Lecture and Lab" },
+            { id: "BIO111", name: "Fundamentals of life Science", credits: 3, type: "Lecture and Lab" },
+            { id: "ACM215", name: "Ordinary Differential Equations", credits: 3, type: "Lecture and Lab" },
+            { id: "ACM323", name: "Applied Numerical Methods", credits: 3, type: "Lecture and Lab" },
+            { id: "ACM422", name: "Operations Research", credits: 3, type: "Lecture and Lab" },
+            { id: "CHM113", name: "Chemistry (1)", credits: 3, type: "Lecture and Lab" },
+            { id: "ECE223", name: "Signal and Systems", credits: 3, type: "Lecture and Lab" },
+            { id: "AID323", name: "Parallel & Distributed Computing", credits: 3, type: "Lecture and Lab" },
+            { id: "AID311", name: "Mathematics of Data Science", credits: 3, type: "Lecture and Lab" },
+            { id: "AID321", name: "Machine Learning", credits: 3, type: "Lecture and Lab" },
+            { id: "AID411", name: "BIG Data Analytics & Visualization", credits: 3, type: "Lecture and Lab" },
+            { id: "AID412", name: "Introduction to Neural network", credits: 3, type: "Lecture and Lab" },
+            { id: "AID421", name: "Computer Vision", credits: 3, type: "Lecture and Lab" },
+            { id: "AID322", name: "Data Mining", credits: 3, type: "Lecture and Lab" },
+            { id: "AID422", name: "Natural Language Processing", credits: 3, type: "Lecture and Lab" },
+            { id: "AID324", name: "Image Processing", credits: 3, type: "Lecture and Lab" },
+            { id: "AID413", name: "Data Security", credits: 3, type: "Lecture and Lab" },
+            { id: "AID416", name: "Reinforcement Learning", credits: 3, type: "Lecture and Lab" },
+            { id: "AID426", name: "Robotics", credits: 3, type: "Lecture and Lab" },
+            { id: "AID328", name: "Game Theory", credits: 3, type: "Lecture and Lab" },
+            { id: "AID427", name: "New Trends in Data Science", credits: 3, type: "Lecture and Lab" },
+            { id: "AID428", name: "New Trends in AI", credits: 3, type: "Lecture and Lab" },
+            { id: "AID326", name: "Data Science in Business", credits: 3, type: "Lecture and Lab" },
+            { id: "AID417", name: "Advanced Data Mining", credits: 3, type: "Lecture and Lab" },
+            { id: "AID327", name: "Human Computer Interface", credits: 3, type: "Lecture and Lab" },
+            { id: "AID425", name: "AI in Bio-Computing", credits: 3, type: "Lecture and Lab" },
+            { id: "AID325", name: "BlockChain & Distributed Ledgers", credits: 3, type: "Lecture and Lab" },
+            { id: "AID414", name: "Graduation Project (1)", credits: 2, type: "Lab" },
+            { id: "AID424", name: "Graduation Project (2)", credits: 4, type: "Lab" },
+            { id: "AID423", name: "Field Training (2 Modules)", credits: 5, type: "Lab" },
+            { id: "CSC111", name: "Fundamentals of Programming", credits: 3, type: "Lecture and Lab" },
+            { id: "CSC121", name: "Data Structures and Algorithms", credits: 3, type: "Lecture and Lab" },
+            { id: "CSC122", name: "Advanced Programming", credits: 3, type: "Lecture and Lab" },
+            { id: "CSC211", name: "Software Engineering", credits: 3, type: "Lecture and Lab" },
+            { id: "CSC221", name: "Operating Systems", credits: 3, type: "Lecture and Lab" },
+            { id: "AID312", name: "Intelligent Systems", credits: 3, type: "Lecture and Lab" },
+            { id: "CNC311", name: "Computer Networks", credits: 3, type: "Lecture and Lab" },
+            { id: "CNC314", name: "Database Systems", credits: 3, type: "Lecture and Lab" },
+            { id: "ECE111", name: "Digital Logic Design", credits: 3, type: "Lecture and Lab" },
+            { id: "CSE214", name: "Computer Organization", credits: 3, type: "Lecture and Lab" },
+            { id: "CSC112", name: "Project Management", credits: 3, type: "Lecture and Lab" },
+            { id: "CNC111", name: "Networks and Web Programming", credits: 3, type: "Lecture and Lab" },
+            { id: "CSC113", name: "Compiler Design", credits: 3, type: "Lecture and Lab" },
+            { id: "CSC114", name: "Algorithms Analysis and Design", credits: 3, type: "Lecture and Lab" },
+            { id: "CSE423", name: "Computer Graphics and Visualization", credits: 3, type: "Lecture and Lab" },
+            { id: "AID111", name: "Data Science", credits: 3, type: "Lecture and Lab" },
+            { id: "ECE214", name: "Digital Signal Processing", credits: 3, type: "Lecture and Lab" },
+            { id: "ECE213", name: "Introduction to Electronics Engineering", credits: 3, type: "Lecture and Lab" },
+            { id: "CNC222", name: "Introduction to Embedded Systems", credits: 3, type: "Lecture and Lab" },
+            { id: "AID221", name: "Introduction to Artificial Intelligence", credits: 3, type: "Lecture and Lab" }
+        ];
+        
+        const realInstructors = [
+            { id: "PROF01", name: "Dr. Reda Elbasiony", role: "Professor", preferredSlots: "Not on Tuesday", qualifiedCourses: ["CSC111"] },
+            { id: "PROF02", name: "Dr. Ayman Arafa", role: "Professor", preferredSlots: "Not on Sunday", qualifiedCourses: ["MTH111", "ACM215", "MTH121", "CNC320", "CSC321"] },
+            { id: "PROF03", name: "Dr. Adel Fathy", role: "Professor", preferredSlots: "Not on Wednesday", qualifiedCourses: ["PHY113", "PHY123"] },
+            { id: "PROF04", name: "Dr. Sherine Elmotasem", role: "Professor", preferredSlots: "Not on Monday", qualifiedCourses: ["LRA101"] },
+            { id: "PROF05", name: "Prof. Ahmed Allam", role: "Professor", preferredSlots: "Not on Thursday", qualifiedCourses: ["ECE111"] },
+            { id: "PROF06", name: "Dr. Sameh Sherif", role: "Professor", preferredSlots: "Not on Sunday", qualifiedCourses: ["ECE111", "BIF411", "BIF412", "BIF312", "BIF322", "BIF421"] },
+            { id: "PROF07", name: "Dr. Ahmed Arafa", role: "Professor", preferredSlots: "Not on Tuesday", qualifiedCourses: ["CSC211", "AID413", "AID427", "CNC411", "CSC221", "CNC320", "CNC321"] },
+            { id: "PROF08", name: "Dr. Ahmed Anter", role: "Professor", preferredSlots: "Not on Wednesday", qualifiedCourses: ["AID311", "SPS315"] },
+            { id: "PROF09", name: "Prof. Mostafa Soliman", role: "Professor", preferredSlots: "Not on Monday", qualifiedCourses: ["CSE214", "CSC115", "CSC315", "CNC222", "CNC223", "CSC429", "CSC113"] },
+            { id: "PROF10", name: "Dr. Ahmed Abdel-Malk", role: "Professor", preferredSlots: "Not on Thursday", qualifiedCourses: ["ECE324", "CNC325", "ECE214"] },
+            { id: "PROF11", name: "Dr. Ahmed Bayumi", role: "Professor", preferredSlots: "Not on Sunday", qualifiedCourses: ["AID428", "AID312", "CSC415", "BIF327", "AID412", "AID422"] },
+            { id: "PROF12", name: "Dr. Hataba", role: "Professor", preferredSlots: "Not on Tuesday", qualifiedCourses: ["CNC418", "CNC419", "CSC317", "CSE423"] },
+            { id: "PROF13", name: "Dr. Reda", role: "Professor", preferredSlots: "Not on Wednesday", qualifiedCourses: ["CNC312", "AID426", "CSC317", "CSC422"] },
+            { id: "PROF14", name: "Prof. Samir Ahmed", role: "Professor", preferredSlots: "Not on Monday", qualifiedCourses: ["CNC413", "CNC311", "CNC323", "CNC324", "CNC327", "AID413"] },
+            { id: "PROF15", name: "Dr. Mohamed Issa", role: "Professor", preferredSlots: "Not on Thursday", qualifiedCourses: ["BIF425", "AID417", "CNC314", "CSC122", "BIF321", "BIF323", "BIF328"] },
+            { id: "PROF16", name: "Dr. Mustafa AlSayed", role: "Professor", preferredSlots: "Not on Sunday", qualifiedCourses: ["CSC426", "CSC412", "CNC415", "CSC314", "CSC414"] },
+            { id: "PROF17", name: "Dr. Mohamed Akhames", role: "Professor", preferredSlots: "Not on Tuesday", qualifiedCourses: ["CSC410", "CSC411", "CNC324", "BIF424", "AID323", "CSC324", "AID421", "CSC425", "CSC427"] },
+            { id: "PROF18", name: "Prof. Marghany Hassan", role: "Professor", preferredSlots: "Not on Wednesday", qualifiedCourses: ["BIF413", "AID321", "AID411", "CSC114", "CSC322", "CSE312", "AID111"] },
+            { id: "PROF19", name: "Dr. Nadia Fawzy", role: "Professor", preferredSlots: "Not on Monday", qualifiedCourses: ["CSC221", "AID322", "CNC111"] },
+            { id: "PROF20", name: "Dr. Karim Hamed", role: "Professor", preferredSlots: "Not on Thursday", qualifiedCourses: ["MTH212", "CSC112", "ECE213"] },
+            { id: "PROF21", name: "Dr. Moustafa Mahmoud", role: "Professor", preferredSlots: "Not on Tuesday", qualifiedCourses: ["CSC121", "CSC323", "CNC422"] },
+            { id: "PROF22", name: "Dr. Ali Kandil", role: "Professor", preferredSlots: "Not on Friday", qualifiedCourses: ["MTH121", "ACM323"] },
+            { id: "PROF23", name: "Mohamad Ayad", role: "Professor", preferredSlots: "Not on Wednesday", qualifiedCourses: ["CHM113"] },
+            { id: "PROF24", name: "Prof. gehad G. Mohamed", role: "Professor", preferredSlots: "Not on Monday", qualifiedCourses: ["CHM113"] },
+            { id: "PROF25", name: "Dr. Mostafa Mohamed", role: "Professor", preferredSlots: "Not on Thursday", qualifiedCourses: ["AID322", "AID325"] },
+            { id: "PROF26", name: "Dr. Yassen", role: "Professor", preferredSlots: "Not on Sunday", qualifiedCourses: ["AID324", "CNC421"] },
+            { id: "PROF27", name: "Prof. Adel Al-senn", role: "Professor", preferredSlots: "Not on Tuesday", qualifiedCourses: ["LRA201", "LRA104"] },
+            { id: "PROF28", name: "Dr. Mohamed El-khateeb", role: "Professor", preferredSlots: "Not on Wednesday", qualifiedCourses: ["LRA203", "LRA105"] },
+            { id: "PROF29", name: "Prof. Said Sadik", role: "Professor", preferredSlots: "Not on Monday", qualifiedCourses: ["LRA206", "LRA306"] },
+            { id: "PROF30", name: "Dr. Maali Fouad", role: "Professor", preferredSlots: "Not on Thursday", qualifiedCourses: ["LRA405"] },
+            { id: "PROF31", name: "Prof. Mohamed Hassan", role: "Professor", preferredSlots: "Not on Sunday", qualifiedCourses: ["LRA409", "LRA208"] },
+            { id: "PROF32", name: "Dr. Amal Gomaa", role: "Professor", preferredSlots: "Not on Tuesday", qualifiedCourses: ["LRA410", "LRA103"] },
+            { id: "PROF33", name: "Dr. Kenji Tanaka", role: "Professor", preferredSlots: "Not on Sunday", qualifiedCourses: ["LRA401", "LRA402", "LRA403"] },
+            { id: "PROF34", name: "Dr. Yumi Yamamoto", role: "Professor", preferredSlots: "Not on Thursday", qualifiedCourses: ["LRA401", "LRA402", "LRA404"] },
+            { id: "PROF35", name: "Dr. Haruto Ito", role: "Professor", preferredSlots: "Not on Sunday", qualifiedCourses: ["LRA401", "LRA403", "LRA404"] },
+            { id: "AP01", name: "Eng. Fatma Elsayed", role: "Assistant Professor", preferredSlots: "Not on Sunday", qualifiedCourses: ["AID417", "CNC311", "CSC122", "BIF328", "CNC321", "CNC422"] },
+            { id: "AP02", name: "Eng. Nada Essam", role: "Assistant Professor", preferredSlots: "Not on Tuesday", qualifiedCourses: ["AID411", "BIF425", "CSC121", "CSC122", "AID325"] },
+            { id: "AP03", name: "Eng. Salma Alashry", role: "Assistant Professor", preferredSlots: "Not on Wednesday", qualifiedCourses: ["AID321", "CNC314", "CSC114", "CSC122", "AID322", "CSC321", "CSC322"] },
+            { id: "AP04", name: "Eng. Mariam Ismael", role: "Assistant Professor", preferredSlots: "Not on Monday", qualifiedCourses: ["CSC111", "CNC411", "CSC121", "CSC221", "BIF321", "BIF322"] },
+            { id: "AP05", name: "Eng. Nada Hamdy", role: "Assistant Professor", preferredSlots: "Not on Thursday", qualifiedCourses: ["CSC111", "CNC311", "CSE312", "BIF421", "CNC422"] },
+            { id: "AP06", name: "Eng. Salma Waleed", role: "Assistant Professor", preferredSlots: "Not on Sunday", qualifiedCourses: ["AID312", "AID311", "CSC323", "CNC421", "CSC317"] },
+            { id: "AP07", name: "Eng. Menna Hamdi", role: "Assistant Professor", preferredSlots: "Not on Tuesday", qualifiedCourses: ["CNC312", "CNC111", "CSC122", "CSC324", "AID426"] },
+            { id: "AP08", name: "Eng. Omnya Ramadan", role: "Assistant Professor", preferredSlots: "Not on Wednesday", qualifiedCourses: ["CSE214", "CSC315", "CSC115", "CNC222"] },
+            { id: "AP09", name: "Eng. Heba Abdelkader", role: "Assistant Professor", preferredSlots: "Not on Monday", qualifiedCourses: ["CSE214", "BIF327", "AID412", "AID422"] },
+            { id: "AP10", name: "Eng. Nourhan Waleed", role: "Assistant Professor", preferredSlots: "Not on Thursday", qualifiedCourses: ["AID312", "CNC314", "CSC121", "CNC324", "CNC421"] },
+            { id: "AP11", name: "Eng. Menna Magdy", role: "Assistant Professor", preferredSlots: "Not on Sunday", qualifiedCourses: ["CSC211", "CSC317", "AID323", "CSE312", "CSC422"] },
+            { id: "AP12", name: "Eng. Nada Ahmed", role: "Assistant Professor", preferredSlots: "Not on Tuesday", qualifiedCourses: ["CSC211", "CSC317", "AID325", "CSC422"] },
+            { id: "AP13", name: "Eng. Laila Ibrahim", role: "Assistant Professor", preferredSlots: "Not on Wednesday", qualifiedCourses: ["CSC121", "PHY113", "ECE111"] },
+            { id: "AP14", name: "Eng. Tarek Salah", role: "Assistant Professor", preferredSlots: "Not on Monday", qualifiedCourses: ["CSE214", "AID311", "CNC314"] },
+            { id: "AP15", name: "Eng. Rana Mohamed", role: "Assistant Professor", preferredSlots: "Not on Thursday", qualifiedCourses: ["CNC223", "AID324"] },
+            { id: "AP16", name: "Eng. Saeed Mostafa", role: "Assistant Professor", preferredSlots: "Not on Sunday", qualifiedCourses: ["CSC221", "CNC320", "AID421", "CSC427"] },
+            { id: "AP17", name: "Eng. Maria Mounir", role: "Assistant Professor", preferredSlots: "Not on Tuesday", qualifiedCourses: ["CSC221", "CNC323", "CSC425"] },
+            { id: "AP18", name: "Eng. Alaa Essam", role: "Assistant Professor", preferredSlots: "Not on Wednesday", qualifiedCourses: ["BIF323", "AID421"] },
+            { id: "AP19", name: "Eng. Bassant Tolba", role: "Assistant Professor", preferredSlots: "Not on Monday", qualifiedCourses: ["CNC325"] },
+            { id: "AP20", name: "Eng. Menna Mahmoud", role: "Assistant Professor", preferredSlots: "Not on Thursday", qualifiedCourses: ["CNC327", "AID422"] }
+        ];
+        
+        const realRooms = [
+            { id: "R101", type: "Lecture", capacity: 80 },
+            { id: "R102", type: "Lecture", capacity: 80 },
+            { id: "R103", type: "Lecture", capacity: 80 },
+            { id: "R104", type: "Lecture", capacity: 80 },
+            { id: "R105", type: "Lecture", capacity: 80 },
+            { id: "R106", type: "Lecture", capacity: 80 },
+            { id: "R107", type: "Lecture", capacity: 80 },
+            { id: "R108", type: "Lecture", capacity: 80 },
+            { id: "R109", type: "Lecture", capacity: 80 },
+            { id: "R110", type: "Lecture", capacity: 80 },
+            { id: "R111", type: "Lecture", capacity: 80 },
+            { id: "R112", type: "Lecture", capacity: 80 },
+            { id: "R113", type: "Lecture", capacity: 80 },
+            { id: "R114", type: "Lecture", capacity: 80 },
+            { id: "L1", type: "Lab", capacity: 35 },
+            { id: "L2", type: "Lab", capacity: 35 },
+            { id: "L3", type: "Lab", capacity: 35 },
+            { id: "L4", type: "Lab", capacity: 35 },
+            { id: "L5", type: "Lab", capacity: 35 },
+            { id: "L6", type: "Lab", capacity: 35 },
+            { id: "L7", type: "Lab", capacity: 35 },
+            { id: "L8", type: "Lab", capacity: 35 },
+            { id: "L9", type: "Lab", capacity: 35 },
+            { id: "L10", type: "Lab", capacity: 35 },
+            { id: "L11", type: "Lab", capacity: 35 },
+            { id: "L12", type: "Lab", capacity: 35 },
+            { id: "L13", type: "Lab", capacity: 35 },
+            { id: "L14", type: "Lab", capacity: 35 },
+            { id: "L15", type: "Lab", capacity: 35 },
+            { id: "L16", type: "Lab", capacity: 35 },
+            { id: "L17", type: "Lab", capacity: 35 },
+            { id: "L18", type: "Lab", capacity: 35 },
+            { id: "L19", type: "Lab", capacity: 35 },
+            { id: "L20", type: "Lab", capacity: 35 },
+            { id: "L21", type: "Lab", capacity: 35 },
+            { id: "L22", type: "Lab", capacity: 35 },
+            { id: "L23", type: "Lab", capacity: 35 },
+            { id: "L24", type: "Lab", capacity: 35 },
+            { id: "L25", type: "Lab", capacity: 35 },
+            { id: "L26", type: "Lab", capacity: 35 },
+            { id: "L27", type: "Lab", capacity: 35 },
+            { id: "L28", type: "Lab", capacity: 35 },
+            { id: "L29", type: "Lab", capacity: 35 },
+            { id: "L30", type: "Lab", capacity: 35 },
+            { id: "L31", type: "Lab", capacity: 35 },
+            { id: "L32", type: "Lab", capacity: 35 },
+            { id: "L33", type: "Lab", capacity: 35 },
+            { id: "L34", type: "Lab", capacity: 35 },
+            { id: "L35", type: "Lab", capacity: 35 },
+            { id: "L36", type: "Lab", capacity: 35 },
+            { id: "L37", type: "Lab", capacity: 35 },
+            { id: "L38", type: "Lab", capacity: 35 },
+            { id: "L39", type: "Lab", capacity: 35 },
+            { id: "L40", type: "Lab", capacity: 35 },
+            { id: "L41", type: "Lab", capacity: 35 },
+            { id: "L42", type: "Lab", capacity: 35 }
+        ];
+        
+        const realTimeSlots = [
+            { day: "Sunday", startTime: "9:00 AM", endTime: "10:30 AM" },
+            { day: "Sunday", startTime: "10:45 AM", endTime: "12:15 PM" },
+            { day: "Sunday", startTime: "12:30 PM", endTime: "2:00 PM" },
+            { day: "Sunday", startTime: "2:15 PM", endTime: "3:45 PM" },
+            { day: "Monday", startTime: "9:00 AM", endTime: "10:30 AM" },
+            { day: "Monday", startTime: "10:45 AM", endTime: "12:15 PM" },
+            { day: "Monday", startTime: "12:30 PM", endTime: "2:00 PM" },
+            { day: "Monday", startTime: "2:15 PM", endTime: "3:45 PM" },
+            { day: "Tuesday", startTime: "9:00 AM", endTime: "10:30 AM" },
+            { day: "Tuesday", startTime: "10:45 AM", endTime: "12:15 PM" },
+            { day: "Tuesday", startTime: "12:30 PM", endTime: "2:00 PM" },
+            { day: "Tuesday", startTime: "2:15 PM", endTime: "3:45 PM" },
+            { day: "Wednesday", startTime: "9:00 AM", endTime: "10:30 AM" },
+            { day: "Wednesday", startTime: "10:45 AM", endTime: "12:15 PM" },
+            { day: "Wednesday", startTime: "12:30 PM", endTime: "2:00 PM" },
+            { day: "Wednesday", startTime: "2:15 PM", endTime: "3:45 PM" },
+            { day: "Thursday", startTime: "9:00 AM", endTime: "10:30 AM" },
+            { day: "Thursday", startTime: "10:45 AM", endTime: "12:15 PM" },
+            { day: "Thursday", startTime: "12:30 PM", endTime: "2:00 PM" },
+            { day: "Thursday", startTime: "2:15 PM", endTime: "3:45 PM" }
+        ];
+        
+        function showTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // If switching to course selection tab, populate it
+            if (tabName === 'selection') {
+                console.log('Switching to selection tab, populating courses...');
+                setTimeout(() => {
+                    populateCourseSelection();
+                }, 50);
+            }
+        }
+        
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update HTML attributes
+            const htmlElement = document.getElementById('htmlElement');
+            if (lang === 'ar') {
+                htmlElement.setAttribute('lang', 'ar');
+                htmlElement.setAttribute('dir', 'rtl');
+            } else {
+                htmlElement.setAttribute('lang', 'en');
+                htmlElement.setAttribute('dir', 'ltr');
+            }
+            
+            // Update page title
+            document.title = lang === 'ar' ? 'نماذج الـ Output للجدول' : 'Timetable Output Examples';
+            
+            // Update all elements with data attributes
+            const elements = document.querySelectorAll('[data-ar][data-en]');
+            elements.forEach(element => {
+                const text = element.getAttribute(`data-${lang}`);
+                if (text) {
+                    element.textContent = text;
+                }
+            });
+            
+            // Update language toggle buttons
+            const langButtons = document.querySelectorAll('.lang-btn');
+            langButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if ((lang === 'ar' && btn.textContent === 'العربية') || 
+                    (lang === 'en' && btn.textContent === 'English')) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update download button alert
+            window.downloadExcel = function() {
+                const message = lang === 'ar' ? 'سيتم تحميل ملف generated_timetable.xlsx' : 'generated_timetable.xlsx file will be downloaded';
+                alert(message);
+            };
+        }
+        
+        // Initialize download function
+        window.downloadExcel = function() {
+            alert('سيتم تحميل ملف generated_timetable.xlsx');
+        };
+        
+        // Function to populate timetable with real data
+        function populateTimetable() {
+            const tbody = document.getElementById('timetableBody');
+            if (!tbody) return;
+            
+            // Clear existing content
+            tbody.innerHTML = '';
+            
+            // Sample timetable data using real courses and instructors
+            const sampleTimetable = [
+                { section: "AID-S1", course: realCourses[65], instructor: realInstructors[17], day: "Sunday", startTime: "9:00 AM", endTime: "10:30 AM", room: realRooms[14] },
+                { section: "AID-S1", course: realCourses[66], instructor: realInstructors[18], day: "Sunday", startTime: "10:45 AM", endTime: "12:15 PM", room: realRooms[15] },
+                { section: "AID-S1", course: realCourses[67], instructor: realInstructors[19], day: "Monday", startTime: "9:00 AM", endTime: "10:30 AM", room: realRooms[16] },
+                { section: "AID-S1", course: realCourses[68], instructor: realInstructors[20], day: "Monday", startTime: "10:45 AM", endTime: "12:15 PM", room: realRooms[17] },
+                { section: "AID-S1", course: realCourses[69], instructor: realInstructors[21], day: "Tuesday", startTime: "9:00 AM", endTime: "10:30 AM", room: realRooms[18] },
+                { section: "AID-S2", course: realCourses[70], instructor: realInstructors[22], day: "Tuesday", startTime: "10:45 AM", endTime: "12:15 PM", room: realRooms[19] },
+                { section: "AID-S2", course: realCourses[71], instructor: realInstructors[23], day: "Wednesday", startTime: "9:00 AM", endTime: "10:30 AM", room: realRooms[20] },
+                { section: "AID-S2", course: realCourses[72], instructor: realInstructors[24], day: "Wednesday", startTime: "10:45 AM", endTime: "12:15 PM", room: realRooms[21] },
+                { section: "AID-S2", course: realCourses[73], instructor: realInstructors[25], day: "Thursday", startTime: "9:00 AM", endTime: "10:30 AM", room: realRooms[22] },
+                { section: "AID-S3", course: realCourses[74], instructor: realInstructors[26], day: "Thursday", startTime: "10:45 AM", endTime: "12:15 PM", room: realRooms[23] },
+                { section: "AID-S3", course: realCourses[75], instructor: realInstructors[27], day: "Sunday", startTime: "12:30 PM", endTime: "2:00 PM", room: realRooms[24] },
+                { section: "AID-S3", course: realCourses[76], instructor: realInstructors[28], day: "Monday", startTime: "12:30 PM", endTime: "2:00 PM", room: realRooms[25] },
+                { section: "AID-S3", course: realCourses[77], instructor: realInstructors[29], day: "Tuesday", startTime: "12:30 PM", endTime: "2:00 PM", room: realRooms[26] },
+                { section: "AID-S3", course: realCourses[78], instructor: realInstructors[30], day: "Wednesday", startTime: "12:30 PM", endTime: "2:00 PM", room: realRooms[27] },
+                { section: "AID-S3", course: realCourses[79], instructor: realInstructors[31], day: "Thursday", startTime: "12:30 PM", endTime: "2:00 PM", room: realRooms[28] }
+            ];
+            
+            // Populate table with sample data
+            sampleTimetable.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Determine type color
+                let typeColor = '#3b82f6'; // Default for Lecture
+                let typeText = 'Lecture';
+                
+                if (item.course.type === 'Lab') {
+                    typeColor = '#10b981';
+                    typeText = 'Lab';
+                } else if (item.course.type === 'Lecture and Lab') {
+                    typeColor = '#8b5cf6';
+                    typeText = 'Lecture and Lab';
+                }
+                
+                row.innerHTML = `
+                    <td>${item.section}</td>
+                    <td>${item.course.name}</td>
+                    <td>${item.course.id}</td>
+                    <td><span style="color: ${typeColor}; font-weight: bold;">${typeText}</span></td>
+                    <td>${item.day}</td>
+                    <td>${item.startTime}</td>
+                    <td>${item.endTime}</td>
+                    <td>${item.room.id}</td>
+                    <td>${item.instructor.name}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Function to update statistics with real data
+        function updateStatistics() {
+            // Update course count
+            const totalCoursesElement = document.getElementById('totalCourses');
+            if (totalCoursesElement) {
+                totalCoursesElement.textContent = realCourses.length;
+            }
+            
+            // Update instructor count
+            const totalInstructorsElement = document.getElementById('totalInstructors');
+            if (totalInstructorsElement) {
+                totalInstructorsElement.textContent = realInstructors.length;
+            }
+            
+            // Update room count
+            const totalRoomsElement = document.getElementById('totalRooms');
+            if (totalRoomsElement) {
+                totalRoomsElement.textContent = realRooms.length;
+            }
+            
+            // Update time slots count
+            const totalTimeSlotsElement = document.getElementById('totalTimeSlots');
+            if (totalTimeSlotsElement) {
+                totalTimeSlotsElement.textContent = realTimeSlots.length;
+            }
+            
+            // Calculate estimated lectures (courses * sections * average sessions per course)
+            const estimatedLectures = Math.floor(realCourses.length * 12 * 0.3); // Rough estimate
+            const totalLecturesElement = document.getElementById('totalLectures');
+            if (totalLecturesElement) {
+                totalLecturesElement.textContent = estimatedLectures;
+            }
+        }
+        
+        // CSV Parser Function
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                    const values = lines[i].split(',').map(v => v.trim());
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] || '';
+                    });
+                    data.push(row);
+                }
+            }
+            return data;
+        }
+        
+        // Upload CSV Function
+        function uploadCSV(type) {
+            const fileInput = document.getElementById(type + 'File');
+            const statusDiv = document.getElementById(type + 'Status');
+            
+            if (!fileInput.files[0]) {
+                statusDiv.innerHTML = '<span style="color: red;">❌ Please select a file first</span>';
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const csvData = parseCSV(e.target.result);
+                    console.log(`${type} data loaded:`, csvData);
+                    
+                    // Store data based on type
+                    switch(type) {
+                        case 'courses':
+                            window.realCourses = csvData.map(row => ({
+                                id: row.CourseID || row.courseId || row.id,
+                                name: row.CourseName || row.courseName || row.name,
+                                credits: parseInt(row.Credits || row.credits || row.hours) || 0,
+                                type: row.Type || row.type || row.courseType || 'Lecture'
+                            }));
+                            break;
+                        case 'instructor':
+                            window.realInstructors = csvData.map(row => ({
+                                id: row.InstructorID || row.instructorId || row.id,
+                                name: row.Name || row.name || row.instructorName,
+                                role: row.Role || row.role || row.position || 'Professor',
+                                preferredSlots: row.PreferredSlots || row.preferredSlots || row.availability || 'Available',
+                                qualifiedCourses: (row.QualifiedCourses || row.qualifiedCourses || row.courses || '').split(',').map(c => c.trim())
+                            }));
+                            break;
+                        case 'rooms':
+                            window.realRooms = csvData.map(row => ({
+                                id: row.RoomID || row.roomId || row.id,
+                                type: row.Type || row.type || row.roomType || 'Lecture',
+                                capacity: parseInt(row.Capacity || row.capacity || row.seats) || 0
+                            }));
+                            break;
+                        case 'timeslots':
+                            window.realTimeSlots = csvData.map(row => ({
+                                day: row.Day || row.day,
+                                startTime: row.StartTime || row.startTime,
+                                endTime: row.EndTime || row.endTime
+                            }));
+                            break;
+                    }
+                    
+                    // Save to localStorage
+                    localStorage.setItem(`${type}Data`, JSON.stringify(window[`real${type.charAt(0).toUpperCase() + type.slice(1)}`]));
+                    
+                    statusDiv.innerHTML = `<span style="color: green;">✅ ${csvData.length} records loaded successfully!</span>`;
+                    updateDataPreview();
+                    
+                } catch (error) {
+                    console.error('Error parsing CSV:', error);
+                    statusDiv.innerHTML = '<span style="color: red;">❌ Error parsing CSV file</span>';
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // Upload All Files Function
+        function uploadAllFiles() {
+            const files = ['courses', 'instructor', 'rooms', 'timeslots'];
+            let uploadedCount = 0;
+            
+            files.forEach(type => {
+                const fileInput = document.getElementById(type + 'File');
+                if (fileInput.files[0]) {
+                    uploadCSV(type);
+                    uploadedCount++;
+                }
+            });
+            
+            if (uploadedCount > 0) {
+                setTimeout(() => {
+                    refreshAllData();
+                    alert(`${uploadedCount} files uploaded successfully! Website updated.`);
+                }, 1000);
+            } else {
+                alert('Please select at least one file to upload.');
+            }
+        }
+        
+        // Update Data Preview
+        function updateDataPreview() {
+            document.getElementById('previewCourses').textContent = window.realCourses ? window.realCourses.length : 91;
+            document.getElementById('previewInstructors').textContent = window.realInstructors ? window.realInstructors.length : 56;
+            document.getElementById('previewRooms').textContent = window.realRooms ? window.realRooms.length : 56;
+            document.getElementById('previewTimeSlots').textContent = window.realTimeSlots ? window.realTimeSlots.length : 20;
+        }
+        
+        // Refresh All Data Function
+        function refreshAllData() {
+            populateTimetable();
+            updateStatistics();
+            updateDataPreview();
+        }
+        
+        // Load data from localStorage on page load
+        function loadStoredData() {
+            const types = ['Courses', 'Instructors', 'Rooms', 'TimeSlots'];
+            
+            types.forEach(type => {
+                const stored = localStorage.getItem(type.toLowerCase() + 'Data');
+                if (stored) {
+                    try {
+                        window[`real${type}`] = JSON.parse(stored);
+                    } catch (error) {
+                        console.error(`Error loading ${type} data:`, error);
+                    }
+                }
+            });
+        }
+        
+        // Course Selection Variables
+        let selectedCourses = new Set();
+        let filteredCourses = [];
+        
+        // Course Selection Functions
+        function populateCourseSelection() {
+            const coursesList = document.getElementById('coursesList');
+            if (!coursesList) {
+                console.log('coursesList not found');
+                return;
+            }
+            
+            coursesList.innerHTML = '';
+            filteredCourses = [];
+            
+            const courses = window.realCourses || [];
+            console.log('Total courses to populate:', courses.length);
+            
+            if (courses.length === 0) {
+                coursesList.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">No courses available. Please upload course data first.</div>';
+                return;
+            }
+            
+            courses.forEach((course, index) => {
+                const courseItem = document.createElement('div');
+                courseItem.className = 'course-list-item';
+                courseItem.id = `course-${index}`;
+                courseItem.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    padding: 12px;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 8px;
+                    background: white;
+                    transition: all 0.3s;
+                    cursor: pointer;
+                `;
+                courseItem.onclick = () => toggleCourseSelection(index);
+                
+                const typeColor = course.type === 'Lab' ? '#10b981' : 
+                                 course.type === 'Lecture and Lab' ? '#8b5cf6' : '#3b82f6';
+                
+                courseItem.innerHTML = `
+                    <input type="checkbox" class="course-checkbox" id="checkbox-${index}" onchange="toggleCourseSelection(${index})" style="margin-right: 12px; width: 18px; height: 18px;">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                            <span style="font-weight: bold; color: #667eea; font-size: 14px;">${course.id}</span>
+                            <span style="background: ${typeColor}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;">${course.type}</span>
+                            <span style="color: #666; font-size: 12px;">${course.credits} Credits</span>
+                        </div>
+                        <div style="color: #333; font-size: 14px; line-height: 1.4;">${course.name}</div>
+                    </div>
+                `;
+                
+                coursesList.appendChild(courseItem);
+                filteredCourses.push(course);
+            });
+            
+            console.log('Course list items created:', coursesList.children.length);
+            updateCourseCounts();
+        }
+        
+        function toggleCourseSelection(index) {
+            const courseItem = document.getElementById(`course-${index}`);
+            const checkbox = document.getElementById(`checkbox-${index}`);
+            
+            if (selectedCourses.has(index)) {
+                selectedCourses.delete(index);
+                courseItem.style.background = 'white';
+                courseItem.style.borderColor = '#e5e7eb';
+                checkbox.checked = false;
+            } else {
+                selectedCourses.add(index);
+                courseItem.style.background = '#f0f9ff';
+                courseItem.style.borderColor = '#10b981';
+                checkbox.checked = true;
+            }
+            
+            updateCourseCounts();
+        }
+        
+        function filterCourses() {
+            const searchInput = document.getElementById('courseSearch');
+            const typeFilter = document.getElementById('typeFilter');
+            const departmentFilter = document.getElementById('departmentFilter');
+            
+            if (!searchInput || !typeFilter || !departmentFilter) {
+                console.log('Filter elements not found');
+                return;
+            }
+            
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const typeValue = typeFilter.value;
+            const departmentValue = departmentFilter.value;
+            
+            console.log('Filtering with:', { searchTerm, typeValue, departmentValue });
+            
+            const courses = window.realCourses || [];
+            console.log('Total courses to filter:', courses.length);
+            
+            let visibleCount = 0;
+            
+            courses.forEach((course, index) => {
+                const courseItem = document.getElementById(`course-${index}`);
+                if (!courseItem) {
+                    console.log(`Course item ${index} not found`);
+                    return;
+                }
+                
+                let show = true;
+                
+                // Search filter - check if search term is empty or matches
+                if (searchTerm !== '') {
+                    const nameMatch = course.name.toLowerCase().includes(searchTerm);
+                    const idMatch = course.id.toLowerCase().includes(searchTerm);
+                    if (!nameMatch && !idMatch) {
+                        show = false;
+                    }
+                }
+                
+                // Type filter
+                if (typeValue && course.type !== typeValue) {
+                    show = false;
+                }
+                
+                // Department filter
+                if (departmentValue && !course.id.startsWith(departmentValue)) {
+                    show = false;
+                }
+                
+                // Show/hide the item
+                if (show) {
+                    courseItem.style.display = 'flex';
+                    courseItem.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    courseItem.style.display = 'none';
+                    courseItem.classList.add('hidden');
+                }
+            });
+            
+            console.log('Visible courses after filtering:', visibleCount);
+            updateCourseCounts();
+        }
+        
+        // Test function to debug search
+        function testSearch() {
+            console.log('=== SEARCH TEST ===');
+            console.log('realCourses available:', !!window.realCourses);
+            console.log('realCourses length:', window.realCourses ? window.realCourses.length : 0);
+            
+            if (window.realCourses && window.realCourses.length > 0) {
+                console.log('First few courses:');
+                window.realCourses.slice(0, 3).forEach((course, index) => {
+                    console.log(`${index}: ${course.id} - ${course.name}`);
+                });
+            }
+            
+            const coursesGrid = document.getElementById('coursesGrid');
+            console.log('coursesGrid found:', !!coursesGrid);
+            console.log('coursesGrid children:', coursesGrid ? coursesGrid.children.length : 0);
+            
+            // Test search for "programming"
+            const searchInput = document.getElementById('courseSearch');
+            if (searchInput) {
+                searchInput.value = 'programming';
+                filterCourses();
+                console.log('Search test completed');
+            }
+        }
+        
+        function selectAllVisible() {
+            const courses = window.realCourses || [];
+            courses.forEach((course, index) => {
+                const courseItem = document.getElementById(`course-${index}`);
+                if (courseItem && courseItem.style.display !== 'none') {
+                    if (!selectedCourses.has(index)) {
+                        toggleCourseSelection(index);
+                    }
+                }
+            });
+        }
+        
+        function clearSelection() {
+            selectedCourses.forEach(index => {
+                const courseItem = document.getElementById(`course-${index}`);
+                const checkbox = document.getElementById(`checkbox-${index}`);
+                if (courseItem) {
+                    courseItem.style.background = 'white';
+                    courseItem.style.borderColor = '#e5e7eb';
+                }
+                if (checkbox) {
+                    checkbox.checked = false;
+                }
+            });
+            selectedCourses.clear();
+            updateCourseCounts();
+        }
+        
+        function updateCourseCounts() {
+            const courses = window.realCourses || [];
+            const visibleCount = Array.from(courses).filter((_, index) => {
+                const courseItem = document.getElementById(`course-${index}`);
+                return courseItem && courseItem.style.display !== 'none';
+            }).length;
+            
+            document.getElementById('totalCoursesCount').textContent = courses.length;
+            document.getElementById('selectedCoursesCount').textContent = selectedCourses.size;
+            document.getElementById('visibleCoursesCount').textContent = visibleCount;
+        }
+        
+        function generateSelectedTimetable() {
+            if (selectedCourses.size === 0) {
+                alert('Please select at least one course to generate timetable.');
+                return;
+            }
+            
+            // Create a temporary array of selected courses for timetable generation
+            const selectedCoursesList = Array.from(selectedCourses).map(index => window.realCourses[index]);
+            window.tempSelectedCourses = selectedCoursesList;
+            
+            // Update timetable with selected courses
+            populateTimetableWithSelection(selectedCoursesList);
+            updateStatisticsWithSelection(selectedCoursesList);
+            
+            // Switch to table tab to show results
+            showTab('table');
+            
+            alert(`Generated timetable for ${selectedCourses.size} selected courses!`);
+        }
+        
+        function populateTimetableWithSelection(selectedCoursesList) {
+            const tbody = document.getElementById('timetableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            // Generate sample timetable for selected courses
+            selectedCoursesList.forEach((course, courseIndex) => {
+                const instructor = window.realInstructors ? 
+                    window.realInstructors.find(inst => inst.qualifiedCourses.includes(course.id)) || 
+                    window.realInstructors[courseIndex % window.realInstructors.length] : 
+                    { name: 'TBA' };
+                
+                const room = window.realRooms ? 
+                    window.realRooms[courseIndex % window.realRooms.length] : 
+                    { id: 'TBA' };
+                
+                const timeSlot = window.realTimeSlots ? 
+                    window.realTimeSlots[courseIndex % window.realTimeSlots.length] : 
+                    { day: 'TBA', startTime: 'TBA', endTime: 'TBA' };
+                
+                const row = document.createElement('tr');
+                
+                let typeColor = '#3b82f6';
+                let typeText = 'Lecture';
+                
+                if (course.type === 'Lab') {
+                    typeColor = '#10b981';
+                    typeText = 'Lab';
+                } else if (course.type === 'Lecture and Lab') {
+                    typeColor = '#8b5cf6';
+                    typeText = 'Lecture and Lab';
+                }
+                
+                row.innerHTML = `
+                    <td>SEL-${courseIndex + 1}</td>
+                    <td>${course.name}</td>
+                    <td>${course.id}</td>
+                    <td><span style="color: ${typeColor}; font-weight: bold;">${typeText}</span></td>
+                    <td>${timeSlot.day}</td>
+                    <td>${timeSlot.startTime}</td>
+                    <td>${timeSlot.endTime}</td>
+                    <td>${room.id}</td>
+                    <td>${instructor.name}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        function updateStatisticsWithSelection(selectedCoursesList) {
+            // Update statistics to reflect selected courses
+            const totalLecturesElement = document.getElementById('totalLectures');
+            if (totalLecturesElement) {
+                totalLecturesElement.textContent = selectedCoursesList.length;
+            }
+            
+            const totalCoursesElement = document.getElementById('totalCourses');
+            if (totalCoursesElement) {
+                totalCoursesElement.textContent = selectedCoursesList.length;
+            }
+        }
+        
+        function viewSelectedCourses() {
+            const selectedPreview = document.getElementById('selectedPreview');
+            const selectedCoursesList = document.getElementById('selectedCoursesList');
+            
+            if (selectedCourses.size === 0) {
+                alert('No courses selected.');
+                return;
+            }
+            
+            selectedCoursesList.innerHTML = '';
+            
+            Array.from(selectedCourses).forEach(index => {
+                const course = window.realCourses[index];
+                const courseDiv = document.createElement('div');
+                courseDiv.style.background = 'white';
+                courseDiv.style.padding = '15px';
+                courseDiv.style.borderRadius = '10px';
+                courseDiv.style.border = '2px solid #10b981';
+                
+                courseDiv.innerHTML = `
+                    <div style="font-weight: bold; color: #667eea;">${course.id}</div>
+                    <div style="margin: 5px 0;">${course.name}</div>
+                    <div style="font-size: 12px; color: #666;">${course.type} • ${course.credits} Credits</div>
+                `;
+                
+                selectedCoursesList.appendChild(courseDiv);
+            });
+            
+            selectedPreview.style.display = 'block';
+        }
+        
+        function exportSelectedData() {
+            if (selectedCourses.size === 0) {
+                alert('No courses selected.');
+                return;
+            }
+            
+            const selectedCoursesList = Array.from(selectedCourses).map(index => window.realCourses[index]);
+            const csvContent = "CourseID,CourseName,Credits,Type\n" + 
+                selectedCoursesList.map(course => 
+                    `${course.id},${course.name},${course.credits},${course.type}`
+                ).join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'selected_courses.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+        
+        // Initialize timetable when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded - Initializing...');
+            loadStoredData();
+            populateTimetable();
+            updateStatistics();
+            updateDataPreview();
+            
+            // Add a small delay to ensure all elements are rendered
+            setTimeout(() => {
+                console.log('Populating course selection...');
+                populateCourseSelection();
+            }, 100);
+        });
+    </script>
+</body>
+</html>
